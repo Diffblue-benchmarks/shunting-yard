@@ -1,7 +1,10 @@
 buildCmd: mvn test -DskipTests
-testCmd: 	mvn surefire:test -fn
+testCmd: mvn surefire:test -fn
 cbmcArguments:
   java-generate-no-comments: true
+  do-not-test-methods-with-access: [ private ]
+  cover-function-only: false
+  cover-only: file
 phases:
   -
     #0
