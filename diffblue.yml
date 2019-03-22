@@ -32,10 +32,6 @@ phases:
       cover-only: file
       # <DEFINE>
       refine: true
-    # If the logs contains output of the following then proceed to phase X
-    nextPhase:
-      # If the function is not analysable then do not pass onto the next phase
-      not_analyzed: null
   -
   #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
     timeout: 450
@@ -66,7 +62,6 @@ phases:
       cover-only: file
       # <DEFINE>
       refine: true
-      # If the logs contains output of the following then proceed to phase X
   -
   #Phase 2 COMPLEX - Standard models, longer run time, Do Not Test Private Method Directly
     timeout: 300
