@@ -1,106 +1,275 @@
 cbmcArguments:
+  # Do not generate coverage comments on generated tests.
   java-generate-no-comments: true
-  do-not-test-methods-with-access: [ private ]
-  cover-function-only: false
-  cover-only: file
 phases:
   -
-    #0
-    timeout: 300
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 150
     cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
       classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
       depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
       java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
       java-max-vla-length: 48
+      # Maximum allowed length for an array passed as test input.
       max-nondet-array-length: 10
+      # Bound the length of input strings.
       max-nondet-string-length: 10
+      # Add constraint that strings are printable
       string-printable: true
+      # Make implicit runtime exceptions explicit.
       throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
       unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+      # <DEFINE>
+      refine: true
+    # If the logs contains output of the following then proceed to phase X
     nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
       not_analyzed: null
-      time_out: 3
   -
-    #1
-    timeout: 300
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 450
     cbmcArguments:
-      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
-      depth: 1500
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
       java-assume-inputs-non-null: false
-      java-max-vla-length:  96
-      max-nondet-array-length: 20
-      max-nondet-string-length: 50
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 48
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
       string-printable: true
+      # Make implicit runtime exceptions explicit.
       throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
       unwind: 2
-    nextPhase:
-      time_out: 3
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+      # <DEFINE>
+      refine: true
+      # If the logs contains output of the following then proceed to phase X
   -
-    #2
+  #Phase 2 COMPLEX - Standard models, longer run time, Do Not Test Private Method Directly
     timeout: 300
     cbmcArguments:
+      # Use the standard models library
       classpath: '/tools/cbmc/models.jar:.'
-      depth: 3000
-      java-assume-inputs-non-null: false
-      java-max-vla-length:  192
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 48
+      # Maximum allowed length for an array passed as test input.
       max-nondet-array-length: 30
-      max-nondet-string-length: 100
-      string-printable: false
-      throw-runtime-exceptions: true
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+      # Allow up to N mutator calls after a test input constructor (default 0)
+      java-test-input-factory-bmc-max-mutators: 5
+      # If the logs contains output of the following then proceed to phase X
+  -
+  #Phase 3 Simple and Private Directly
+    timeout: 150
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 48
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+    # If the logs contains output of the following then proceed to phase X
+  -
+  #Phase 4 Complex and Private Directly
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 192
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
       unwind: 3
   -
-    #3
+  #Phase 5 EXCEPTIONS
     timeout: 300
     cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 192
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+  -
+  #PHASE 6 SIMPLE PRETTY MOCKING (CLASS)
+    timeout: 150
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
       classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
       depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
       java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
       java-max-vla-length: 48
+      # Only load the class (and related inner/outer classes) containing the method under test,
       load-containing-class-only: true
+      # Maximum allowed length for an array passed as test input.
       max-nondet-array-length: 10
+      # Bound the length of input strings.
       max-nondet-string-length: 10
+      # Add constraint that strings are printable
       string-printable: true
+      # Make implicit runtime exceptions explicit.
       throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
       unwind: 1
   -
-    #4
+    #PHASE 7 COMPLEX MOCKING (CLASS)
     timeout: 300
     cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
       classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
       depth: 3000
+      # never initialize reference-typed parameter to the entry point with null
       java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
       java-max-vla-length:  192
+      # Only load the class (and related inner/outer classes) containing the method under test,
       load-containing-class-only: true
+      # Maximum allowed length for an array passed as test input.
       max-nondet-array-length: 30
+      # Bound the length of input strings.
       max-nondet-string-length: 100
+      # Add constraint that strings are printable
       string-printable: false
-      throw-runtime-exceptions: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
       unwind: 3
   -
-    #5
-    timeout: 300
+    #PHASE 8 SIMPLE MOCKING (FUNCITON)
+    timeout: 150
     cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
       classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
       depth: 1500
+      # never initialize reference-typed parameter to the entry point with n
       java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
       java-max-vla-length: 48
+      # Maximum allowed length for an array passed as test input.
       max-nondet-array-length: 10
+      # Bound the length of input strings.
       max-nondet-string-length: 10
+      # analyze the entry point function only
       single-function-only: true
+      # Add constraint that strings are printable
       string-printable: true
+      # Make implicit runtime exceptions explicit.
       throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
       unwind: 1
   -
-    #6
+    #PHASE 7 COMPLEX MOCKING (FUNCTION)
     timeout: 300
     cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
       classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
       depth: 3000
+      # never initialize reference-typed parameter to the entry point with null
       java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
       java-max-vla-length:  192
-      max-nondet-array-length: 30
-      max-nondet-string-length: 100
+      # analyze the entry point function only
       single-function-only: true
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
       string-printable: false
-      throw-runtime-exceptions: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
       unwind: 3
+  -
+    #PHASE 10 BIG NUMBERS
+    timeout: 300
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length:  192
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 150
+      # Bound the length of input strings.
+      max-nondet-string-length: 150
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
